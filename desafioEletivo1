@@ -1,0 +1,100 @@
+# Importando as bibliotecas necessárias
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+from scipy import stats
+
+# Definindo os conjuntos de dados
+grupo1 = np.array([12, 15, 18, 22, 22, 25, 28, 30, 35, 40])
+grupo2 = np.array([15, 18, 21, 25, 25, 28, 31, 33, 38, 43])
+
+# 1. Calculando média, variância e IQR para ambos os grupos
+# Grupo 1
+media_g1 = np.mean(grupo1)
+variancia_g1 = np.var(grupo1, ddof=1)  # ddof=1 para variância amostral
+q1_g1 = np.percentile(grupo1, 25)
+q3_g1 = np.percentile(grupo1, 75)
+iqr_g1 = q3_g1 - q1_g1
+
+# Grupo 2
+media_g2 = np.mean(grupo2)
+variancia_g2 = np.var(grupo2, ddof=1)
+q1_g2 = np.percentile(grupo2, 25)
+q3_g2 = np.percentile(grupo2, 75)
+iqr_g2 = q3_g2 - q1_g2
+
+print("Grupo 1:")
+print(f"Média: {media_g1:.2f}")
+print(f"Variância: {variancia_g1:.2f}")
+print(f"IQR: {iqr_g1:.2f}")
+
+print("\nGrupo 2:")
+print(f"Média: {media_g2:.2f}")
+print(f"Variância: {variancia_g2:.2f}")
+print(f"IQR: {iqr_g2:.2f}")
+
+# 2. Testando a normalidade com Shapiro-Wilk
+shapiro_g1 = stats.shapiro(grupo1)
+shapiro_g2 = stats.shapiro(grupo2)
+
+print("\nTeste de Normalidade (Shapiro-Wilk):")
+print(f"Grupo 1: estatística={shapiro_g1[0]:.4f}, p-valor={shapiro_g1[1]:.4f}")
+print(f"Grupo 2: estatística={shapiro_g2[0]:.4f}, p-valor={shapiro_g2[1]:.4f}")
+
+# Verificando se os dados seguem uma distribuição normal (p > 0.05)
+alpha = 0.05
+g1_normal = shapiro_g1[1] > alpha
+g2_normal = shapiro_g2[1] > alpha
+
+print(f"Grupo 1 segue distribuição normal? {'Sim' if g1_normal else 'Não'}")
+print(f"Grupo 2 segue distribuição normal? {'Sim' if g2_normal else 'Não'}")
+
+# 3. Realizando o teste apropriado (t-Student ou Mann-Whitney)
+if g1_normal and g2_normal:
+    # Teste t de Student para amostras independentes
+    t_stat, p_valor = stats.ttest_ind(grupo1, grupo2, equal_var=True)
+    teste_nome = "t de Student"
+else:
+    # Teste de Mann-Whitney (não paramétrico)
+    t_stat, p_valor = stats.mannwhitneyu(grupo1, grupo2, alternative='two-sided')
+    teste_nome = "Mann-Whitney"
+
+print(f"\nResultado do teste {teste_nome}:")
+print(f"Estatística: {t_stat:.4f}")
+print(f"p-valor: {p_valor:.4f}")
+print(f"Diferença significativa? {'Sim' if p_valor < alpha else 'Não'}")
+
+# 4. Visualizações
+# Histogramas
+plt.figure(figsize=(12, 5))
+
+plt.subplot(1, 2, 1)
+plt.hist(grupo1, bins=5, alpha=0.7, color='blue', edgecolor='black')
+plt.axvline(media_g1, color='red', linestyle='dashed', linewidth=1, label=f'Média: {media_g1:.2f}')
+plt.title('Distribuição do Grupo 1')
+plt.xlabel('Idade')
+plt.ylabel('Frequência')
+plt.legend()
+
+plt.subplot(1, 2, 2)
+plt.hist(grupo2, bins=5, alpha=0.7, color='green', edgecolor='black')
+plt.axvline(media_g2, color='red', linestyle='dashed', linewidth=1, label=f'Média: {media_g2:.2f}')
+plt.title('Distribuição do Grupo 2')
+plt.xlabel('Idade')
+plt.ylabel('Frequência')
+plt.legend()
+
+plt.tight_layout()
+plt.savefig('histogramas.png', dpi=300)
+
+# Boxplot comparativo
+plt.figure(figsize=(10, 6))
+boxplot_data = [grupo1, grupo2]
+plt.boxplot(boxplot_data, labels=['Grupo 1', 'Grupo 2'])
+plt.title('Comparação entre os Grupos')
+plt.ylabel('Idade')
+plt.grid(True, linestyle='--', alpha=0.7)
+plt.savefig('boxplot.png', dpi=300)
+
+print("\nGráficos gerados com sucesso!")
