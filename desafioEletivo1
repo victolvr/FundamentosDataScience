@@ -5,17 +5,33 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from scipy import stats
 
-# Definindo os conjuntos de dados
+# Configurando o estilo dos gráficos
+plt.style.use('seaborn-v0_8-whitegrid')
+sns.set_palette("pastel")
+
+# 1. Definindo os grupos de dados
 grupo1 = np.array([12, 15, 18, 22, 22, 25, 28, 30, 35, 40])
 grupo2 = np.array([15, 18, 21, 25, 25, 28, 31, 33, 38, 43])
 
-# 1. Calculando média, variância e IQR para ambos os grupos
+print("Grupo 1:", grupo1)
+print("Grupo 2:", grupo2)
+print("\n")
+
+# 2. Calculando média, variância e IQR para cada grupo
 # Grupo 1
 media_g1 = np.mean(grupo1)
 variancia_g1 = np.var(grupo1, ddof=1)  # ddof=1 para variância amostral
 q1_g1 = np.percentile(grupo1, 25)
 q3_g1 = np.percentile(grupo1, 75)
 iqr_g1 = q3_g1 - q1_g1
+
+print("Estatísticas do Grupo 1:")
+print(f"Média: {media_g1:.2f}")
+print(f"Variância: {variancia_g1:.2f}")
+print(f"Q1: {q1_g1}")
+print(f"Q3: {q3_g1}")
+print(f"IQR: {iqr_g1}")
+print("\n")
 
 # Grupo 2
 media_g2 = np.mean(grupo2)
@@ -24,82 +40,98 @@ q1_g2 = np.percentile(grupo2, 25)
 q3_g2 = np.percentile(grupo2, 75)
 iqr_g2 = q3_g2 - q1_g2
 
-print("Grupo 1:")
-print(f"Média: {media_g1:.2f}")
-print(f"Variância: {variancia_g1:.2f}")
-print(f"IQR: {iqr_g1:.2f}")
-
-print("\nGrupo 2:")
+print("Estatísticas do Grupo 2:")
 print(f"Média: {media_g2:.2f}")
 print(f"Variância: {variancia_g2:.2f}")
-print(f"IQR: {iqr_g2:.2f}")
+print(f"Q1: {q1_g2}")
+print(f"Q3: {q3_g2}")
+print(f"IQR: {iqr_g2}")
+print("\n")
 
-# 2. Testando a normalidade com Shapiro-Wilk
+# 3. Testando a normalidade com Shapiro-Wilk
+# Grupo 1
 shapiro_g1 = stats.shapiro(grupo1)
+print("Teste de Shapiro-Wilk para o Grupo 1:")
+print(f"Estatística W: {shapiro_g1.statistic:.4f}")
+print(f"p-valor: {shapiro_g1.pvalue:.4f}")
+print(f"Conclusão: {'Os dados seguem uma distribuição normal' if shapiro_g1.pvalue > 0.05 else 'Os dados NÃO seguem uma distribuição normal'}")
+print("\n")
+
+# Grupo 2
 shapiro_g2 = stats.shapiro(grupo2)
+print("Teste de Shapiro-Wilk para o Grupo 2:")
+print(f"Estatística W: {shapiro_g2.statistic:.4f}")
+print(f"p-valor: {shapiro_g2.pvalue:.4f}")
+print(f"Conclusão: {'Os dados seguem uma distribuição normal' if shapiro_g2.pvalue > 0.05 else 'Os dados NÃO seguem uma distribuição normal'}")
+print("\n")
 
-print("\nTeste de Normalidade (Shapiro-Wilk):")
-print(f"Grupo 1: estatística={shapiro_g1[0]:.4f}, p-valor={shapiro_g1[1]:.4f}")
-print(f"Grupo 2: estatística={shapiro_g2[0]:.4f}, p-valor={shapiro_g2[1]:.4f}")
+# 4. Realizando o teste estatístico apropriado
+# Se ambos os grupos seguirem uma distribuição normal, usamos o teste t de Student
+# Caso contrário, usamos o teste de Mann-Whitney
 
-# Verificando se os dados seguem uma distribuição normal (p > 0.05)
-alpha = 0.05
-g1_normal = shapiro_g1[1] > alpha
-g2_normal = shapiro_g2[1] > alpha
-
-print(f"Grupo 1 segue distribuição normal? {'Sim' if g1_normal else 'Não'}")
-print(f"Grupo 2 segue distribuição normal? {'Sim' if g2_normal else 'Não'}")
-
-# 3. Realizando o teste apropriado (t-Student ou Mann-Whitney)
-if g1_normal and g2_normal:
+if shapiro_g1.pvalue > 0.05 and shapiro_g2.pvalue > 0.05:
     # Teste t de Student para amostras independentes
-    t_stat, p_valor = stats.ttest_ind(grupo1, grupo2, equal_var=True)
-    teste_nome = "t de Student"
+    t_test = stats.ttest_ind(grupo1, grupo2, equal_var=True)  # Assumindo variâncias iguais
+    print("Teste t de Student para amostras independentes:")
+    print(f"Estatística t: {t_test.statistic:.4f}")
+    print(f"p-valor: {t_test.pvalue:.4f}")
+    print(f"Conclusão: {'Há diferença significativa entre os grupos' if t_test.pvalue < 0.05 else 'NÃO há diferença significativa entre os grupos'}")
 else:
-    # Teste de Mann-Whitney (não paramétrico)
-    t_stat, p_valor = stats.mannwhitneyu(grupo1, grupo2, alternative='two-sided')
-    teste_nome = "Mann-Whitney"
+    # Teste de Mann-Whitney
+    mw_test = stats.mannwhitneyu(grupo1, grupo2, alternative='two-sided')
+    print("Teste de Mann-Whitney:")
+    print(f"Estatística U: {mw_test.statistic:.4f}")
+    print(f"p-valor: {mw_test.pvalue:.4f}")
+    print(f"Conclusão: {'Há diferença significativa entre os grupos' if mw_test.pvalue < 0.05 else 'NÃO há diferença significativa entre os grupos'}")
+print("\n")
 
-print(f"\nResultado do teste {teste_nome}:")
-print(f"Estatística: {t_stat:.4f}")
-print(f"p-valor: {p_valor:.4f}")
-print(f"Diferença significativa? {'Sim' if p_valor < alpha else 'Não'}")
-
-# 4. Visualizações
-# Histogramas
+# 5. Visualizações
+# Histogramas para cada grupo
 plt.figure(figsize=(12, 5))
 
 plt.subplot(1, 2, 1)
-plt.hist(grupo1, bins=5, alpha=0.7, color='blue', edgecolor='black')
-plt.axvline(media_g1, color='red', linestyle='dashed', linewidth=1, label=f'Média: {media_g1:.2f}')
+sns.histplot(grupo1, kde=True, color='skyblue')
+plt.axvline(media_g1, color='red', linestyle='--', label=f'Média: {media_g1:.2f}')
 plt.title('Distribuição do Grupo 1')
 plt.xlabel('Idade')
 plt.ylabel('Frequência')
 plt.legend()
 
 plt.subplot(1, 2, 2)
-plt.hist(grupo2, bins=5, alpha=0.7, color='green', edgecolor='black')
-plt.axvline(media_g2, color='red', linestyle='dashed', linewidth=1, label=f'Média: {media_g2:.2f}')
+sns.histplot(grupo2, kde=True, color='lightgreen')
+plt.axvline(media_g2, color='red', linestyle='--', label=f'Média: {media_g2:.2f}')
 plt.title('Distribuição do Grupo 2')
 plt.xlabel('Idade')
 plt.ylabel('Frequência')
 plt.legend()
 
 plt.tight_layout()
-plt.savefig('histogramas.png', dpi=300)
+plt.savefig('histogramas_grupos.png', dpi=300, bbox_inches='tight')
 
-# Boxplot comparativo
+# Boxplot comparando os grupos
 plt.figure(figsize=(10, 6))
-boxplot_data = [grupo1, grupo2]
-plt.boxplot(boxplot_data, labels=['Grupo 1', 'Grupo 2'])
+data_df = pd.DataFrame({
+    'Grupo 1': grupo1,
+    'Grupo 2': grupo2
+})
+sns.boxplot(data=data_df)
 plt.title('Comparação entre os Grupos')
 plt.ylabel('Idade')
-plt.grid(True, linestyle='--', alpha=0.7)
-plt.savefig('boxplot.png', dpi=300)
+plt.grid(True, alpha=0.3)
+plt.savefig('boxplot_grupos.png', dpi=300, bbox_inches='tight')
 
-print("\nGráficos gerados com sucesso!")
-plt.ylabel('Idade')
-plt.grid(True, linestyle='--', alpha=0.7)
-plt.savefig('boxplot.png', dpi=300)
+# QQ-plots para verificar normalidade
+plt.figure(figsize=(12, 5))
 
-print("\nGráficos gerados com sucesso!")
+plt.subplot(1, 2, 1)
+stats.probplot(grupo1, dist="norm", plot=plt)
+plt.title('Q-Q Plot do Grupo 1')
+
+plt.subplot(1, 2, 2)
+stats.probplot(grupo2, dist="norm", plot=plt)
+plt.title('Q-Q Plot do Grupo 2')
+
+plt.tight_layout()
+plt.savefig('qqplots_grupos.png', dpi=300, bbox_inches='tight')
+
+print("Análise concluída! Todos os resultados foram exibidos e os gráficos foram salvos.")
