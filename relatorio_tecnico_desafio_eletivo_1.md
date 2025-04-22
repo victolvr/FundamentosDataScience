@@ -114,6 +114,4 @@ Os Q-Q plots mostram que os pontos se alinham bem à linha diagonal, confirmando
 ## 5. Anexo
 
 O código completo utilizado para esta análise está disponível no seguinte endereço eletrônico:
-[https://github.com/seu-usuario/seu-repositorio/desafio_eletivo_1.py](https://github.com/seu-usuario/seu-repositorio/desafio_eletivo_1.py)
-
-Nota: Substitua o link acima pelo endereço real onde você hospedará seu código.
+https://github.com/victolvr/FundamentosDataScience
