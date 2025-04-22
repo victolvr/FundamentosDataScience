@@ -1,3 +1,5 @@
+# Observação: O código cria o arquivo externo `vendas.xlsx` com os dados solicitados. Quando o código é executado, ele gera este arquivo automaticamente.
+
 # Importando as bibliotecas necessárias
 import pandas as pd
 import numpy as np
