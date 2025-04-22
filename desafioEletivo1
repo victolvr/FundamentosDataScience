@@ -98,3 +98,8 @@ plt.grid(True, linestyle='--', alpha=0.7)
 plt.savefig('boxplot.png', dpi=300)
 
 print("\nGráficos gerados com sucesso!")
+plt.ylabel('Idade')
+plt.grid(True, linestyle='--', alpha=0.7)
+plt.savefig('boxplot.png', dpi=300)
+
+print("\nGráficos gerados com sucesso!")
